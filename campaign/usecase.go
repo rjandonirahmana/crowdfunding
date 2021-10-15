@@ -3,6 +3,8 @@ package campaign
 import (
 	"funding/account"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Service struct {
@@ -20,7 +22,10 @@ func NewServiceCampaign(repo CampaignRepository) *Service {
 
 func (s *Service) Create(input CreateCampaignInput, user account.User) error {
 
+	uuid := uuid.New()
+	id := uuid.ID()
 	var campaign Campaign
+	campaign.ID = id
 	campaign.UserID = user.ID
 	campaign.Name = input.Name
 	campaign.ShortDescription = input.ShortDescription

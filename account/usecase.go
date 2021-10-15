@@ -44,11 +44,6 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 	h := sha256.New()
 	h.Write([]byte(input.Password + user.Salt))
 
-	id, err := s.repository.LastID()
-	if err != nil {
-		return User{}, err
-	}
-	user.ID = id + 1
 	user.PasswordHash = fmt.Sprintf("%X", h.Sum(nil))
 	user.Name = input.Name
 	user.Email = input.Email

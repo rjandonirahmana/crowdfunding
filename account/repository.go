@@ -18,24 +18,23 @@ type RepositoryUser interface {
 	FindByID(ID int) (User, error)
 	UpdateUser(user User) error
 	IsEmailAvailable(email string) (bool, error)
-	LastID() (int, error)
 }
 
-func NewRepository(DB *sqlx.DB) *Repository {
-	return &Repository{db: DB}
+func NewRepository(db *sqlx.DB) *Repository {
+	return &Repository{db: db}
 }
 
 func (r *Repository) Save(user User) error {
 	querry := `	INSERT INTO 
 	users
 	(
-		id, name, email, occupation, password, role, created_at, updated_at, salt, avatar
+		name, email, occupation, password, role, created_at, updated_at, salt, avatar
 	) 
 	VALUES
-	($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+	($1, $2, $3, $4, $5, $6, $7, $8, $9)
 	`
 
-	_, err := r.db.Exec(querry, user.ID, user.Name, user.Email, user.Occupation, user.PasswordHash, user.Role, time.Now(), time.Now(), user.Salt, user.Avatar)
+	_, err := r.db.Exec(querry, user.Name, user.Email, user.Occupation, user.PasswordHash, user.Role, time.Now(), time.Now(), user.Salt, user.Avatar)
 
 	if err != nil {
 		return err
@@ -60,14 +59,7 @@ func (r *Repository) FindByEmail(email string) (User, error) {
 
 func (r *Repository) FindByID(ID int) (User, error) {
 	querry := `
-	SELECT
-		name,
-		occupation,
-		email,
-		created_at,
-		updated_at,
-		avatar
-	FROM
+	SELECT * FROM
 		users
 	WHERE 
 		id = $1
@@ -119,17 +111,4 @@ func (r *Repository) IsEmailAvailable(email string) (bool, error) {
 	}
 
 	return true, nil
-}
-
-func (r *Repository) LastID() (int, error) {
-	querry := `SELECT id FROM users WHERE id = (SELECT MAX(id) FROM users)`
-
-	var id int
-	err := r.db.Get(&id, querry)
-	if err != sql.ErrNoRows {
-		return 0, err
-	}
-
-	return id, nil
-
 }

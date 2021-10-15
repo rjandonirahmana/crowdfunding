@@ -17,16 +17,16 @@ func NewRepository(db *sqlx.DB) *repository {
 type CampaignRepository interface {
 	FindAll() ([]Campaign, error)
 	Create(campaign Campaign) error
-	FindByID(campaign_id int) (Campaign, error)
+	FindByID(campaign_id int) (Campaigns, error)
 }
 
 func (r *repository) FindAll() ([]Campaign, error) {
-	querry := `SELECT c.*, ci.filename as "campaign_image.filename" FROM campaign c JOIN campaign_image ci ON c.id = ci.campaign_id WHERE ci.is_primary = $1`
+	querry := `SELECT c.*, ci.filename as "campaign_image.filename" FROM campaign c LEFT JOIN campaign_image ci ON c.id = ci.campaign_id`
 
 	var campaigns []Campaign
-	err := r.db.Select(&campaigns, querry, 1)
-	if err != nil {
-		return []Campaign{}, err
+	err := r.db.Select(&campaigns, querry)
+	if err != sql.ErrNoRows {
+		return campaigns, err
 	}
 
 	return campaigns, nil
@@ -44,24 +44,24 @@ func (r *repository) Create(campaign Campaign) error {
 	return nil
 }
 
-func (r *repository) FindByID(campaign_id int) (Campaign, error) {
+func (r *repository) FindByID(campaign_id int) (Campaigns, error) {
 	querry := `SELECT campaign_id, filename, is_primary FROM campaign_image WHERE campaign_id = $1`
 
 	var images []CampaignImage
 	err := r.db.Select(&images, querry, campaign_id)
 
 	if err != nil {
-		return Campaign{}, err
+		return Campaigns{}, err
 	}
 
-	var campaign Campaign
+	var campaign Campaigns
 	querry1 := `SELECT * FROM campaign WHERE id = $1`
 	err = r.db.Get(&campaign, querry1, campaign_id)
 	if err != sql.ErrNoRows {
-		return Campaign{}, err
+		return Campaigns{}, err
 	}
 
-	campaign.CampaignImages = append(campaign.CampaignImages, images...)
+	campaign.CampaignImage = append(campaign.CampaignImage, images...)
 	return campaign, nil
 
 }

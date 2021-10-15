@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"funding/account"
 	auth "funding/authentikasi"
+	"funding/campaign"
 	"funding/handler"
 	"log"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 )
 
 func main() {
+
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -25,23 +27,27 @@ func main() {
 	dbName := os.Getenv("DB_NAME")
 	dbPass := os.Getenv("DB_PASSWORD")
 
-	dbString := fmt.Sprintf("host=localhost port=5432 user=%s password=%s dbname=%s sslmode=disable", dbUserName, dbPass, dbName)
+	dbString := fmt.Sprintf("host=localhost user=%s password=%s dbname=%s sslmode=disable", dbUserName, dbPass, dbName)
 	db, err := sqlx.Connect("postgres", dbString)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	auth := auth.NewAuthentication([]byte(secretKey))
+	auth := auth.NewAuthentication(secretKey)
 	repoaccount := account.NewRepository(db)
 	serviceaccount := account.NewService(repoaccount)
 	handleraccount := handler.AccountHandler(serviceaccount, auth)
+	middlware := handler.NewMiddleWare(auth, serviceaccount)
 
-	// repoCampaign := campaign.NewRepository(db)
-	// serviceCampaign := campaign.NewServiceCampaign(repoCampaign)
-	// handerCampaign := handler.NewHandlerCampaign(serviceCampaign, serviceaccount)
+	repoCampaign := campaign.NewRepository(db)
+
+	serviceCampaign := campaign.NewServiceCampaign(repoCampaign)
+	handerCampaign := handler.NewHandlerCampaign(serviceCampaign, serviceaccount)
 
 	http.HandleFunc("/register", handleraccount.RegisterUser)
 	http.HandleFunc("/login", handleraccount.Login)
+	http.HandleFunc("/campaigns", handerCampaign.GetCampaigns)
+	http.HandleFunc("/create", middlware.MidllerWare(handerCampaign.CreateCampaign))
 
 	fmt.Println("starting web server at http://localhost:8181/")
 
