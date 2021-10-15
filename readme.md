@@ -2,6 +2,6 @@
 
 **http** standard package
 
-**sqlx** library 
+**sqlx and postgres** library 
 
 
