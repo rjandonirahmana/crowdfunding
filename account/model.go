@@ -3,7 +3,7 @@ package account
 import "time"
 
 type User struct {
-	ID           uint      `db:"id" json:"-"`
+	ID           uint      `db:"id" json:"id"`
 	Name         string    `db:"name" json:"name"`
 	Occupation   string    `db:"occupation" json:"occupation"`
 	Email        string    `db:"email" json:"email"`
@@ -16,11 +16,11 @@ type User struct {
 }
 
 type RegisterUserInput struct {
-	Name            string `json:"name" binding:"required"`
-	Occupation      string `json:"occupation" binding:"required"`
-	Email           string `json:"email" binding:"required,email"`
-	Password        string `json:"password" binding:"required"`
-	ConfirmPassword string `json:"confirm_password"`
+	Name            string `json:"name" validate:"required"`
+	Occupation      string `json:"occupation" validate:"required"`
+	Email           string `json:"email" validate:"required,email"`
+	Password        string `json:"password" validate:"required,min=6,max=15"`
+	ConfirmPassword string `json:"confirm_password" validate:"required,eqfield=Password"`
 }
 
 type LoginInput struct {

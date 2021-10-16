@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"funding/account"
-	auth "funding/authentikasi"
+	auth "funding/auth"
 	"funding/campaign"
 	"funding/handler"
 	"log"
@@ -23,6 +23,7 @@ func main() {
 	}
 
 	secretKey := os.Getenv("SECRET_KEY")
+	secretKeyAdmin := os.Getenv("SECRET_KEY_ADMIN")
 	dbUserName := os.Getenv("DB_USERNAME")
 	dbName := os.Getenv("DB_NAME")
 	dbPass := os.Getenv("DB_PASSWORD")
@@ -33,7 +34,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	auth := auth.NewAuthentication(secretKey)
+	auth := auth.NewAuthentication(secretKey, secretKeyAdmin)
 	repoaccount := account.NewRepository(db)
 	serviceaccount := account.NewService(repoaccount)
 	handleraccount := handler.AccountHandler(serviceaccount, auth)
@@ -47,6 +48,7 @@ func main() {
 	http.HandleFunc("/register", handleraccount.RegisterUser)
 	http.HandleFunc("/login", handleraccount.Login)
 	http.HandleFunc("/campaigns", handerCampaign.GetCampaigns)
+	http.HandleFunc("/campaign", handerCampaign.GetCampaigID)
 	http.HandleFunc("/create", middlware.MidllerWare(handerCampaign.CreateCampaign))
 
 	fmt.Println("starting web server at http://localhost:8181/")

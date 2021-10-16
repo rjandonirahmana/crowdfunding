@@ -44,7 +44,7 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 	h := sha256.New()
 	h.Write([]byte(input.Password + user.Salt))
 
-	user.PasswordHash = fmt.Sprintf("%X", h.Sum(nil))
+	user.PasswordHash = fmt.Sprintf("%X", h.Sum([]byte(input.Email)))
 	user.Name = input.Name
 	user.Email = input.Email
 	user.Occupation = input.Occupation
@@ -52,10 +52,11 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 	user.Role = "user"
 	user.UpdatedAt = time.Now()
 
-	err = s.repository.Save(user)
+	id, err := s.repository.Save(user)
 	if err != nil {
 		return User{}, err
 	}
+	user.ID = id
 
 	return user, nil
 
@@ -69,7 +70,7 @@ func (s *service) Login(input LoginInput) (User, error) {
 	password := input.Password + account.Salt
 	h := sha256.New()
 	h.Write([]byte(password))
-	password = fmt.Sprintf("%X", h.Sum(nil))
+	password = fmt.Sprintf("%X", h.Sum([]byte(account.Email)))
 
 	if password != account.PasswordHash {
 		return User{}, fmt.Errorf("password incorrect")

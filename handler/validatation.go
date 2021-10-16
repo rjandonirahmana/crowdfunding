@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"funding/account"
-	auth "funding/authentikasi"
+	"funding/admin"
+	auth "funding/auth"
 	"net/http"
-	"strings"
 )
 
 type MiddlewaresAuth struct {
-	auth    auth.Authentication
-	service account.Service
+	auth         auth.Authentication
+	service      account.Service
+	ServiceAdmin admin.Service
 }
 
 func NewMiddleWare(auth auth.Authentication, service account.Service) *MiddlewaresAuth {
@@ -23,8 +24,8 @@ func (m *MiddlewaresAuth) MidllerWare(next http.HandlerFunc) http.HandlerFunc {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		authorizationHeader := r.Header.Get("Authorization")
-		if !strings.Contains(authorizationHeader, "Bearer") {
+		c, err := r.Cookie("token")
+		if err != nil {
 			fmt.Println("error 1")
 			response := APIResponse("failed", http.StatusUnauthorized, "error", nil)
 			resp, _ := json.Marshal(response)
@@ -32,13 +33,7 @@ func (m *MiddlewaresAuth) MidllerWare(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		var token string
-		tokenString := strings.Split(authorizationHeader, " ")
-		if len(tokenString) == 2 {
-			token = tokenString[1]
-		}
-
-		id, err := m.auth.ValidateToken(token)
+		id, err := m.auth.ValidateToken(c.Value)
 		if err != nil {
 			fmt.Println("error 2")
 			response := APIResponse("failed", http.StatusUnauthorized, "error", err)
@@ -56,7 +51,47 @@ func (m *MiddlewaresAuth) MidllerWare(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		ctx := context.WithValue(context.Background(), "user", user)
+		ctx := context.WithValue(context.Background(), "CurrentUser", user)
+		r = r.WithContext(ctx)
+
+		next.ServeHTTP(w, r)
+
+	})
+}
+
+func (m *MiddlewaresAuth) MidllerWareAdmin(next http.HandlerFunc) http.HandlerFunc {
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		w.Header().Set("Content-Type", "application/json")
+		c, err := r.Cookie("token_admin")
+		if err != nil {
+			fmt.Println("error 1")
+			response := APIResponse("failed", http.StatusUnauthorized, "error", nil)
+			resp, _ := json.Marshal(response)
+			w.Write(resp)
+			return
+		}
+
+		id, err := m.auth.ValidateTokenAdmin(c.Value)
+		if err != nil {
+			fmt.Println("error 2")
+			response := APIResponse("failed", http.StatusUnauthorized, "error", err)
+			resp, _ := json.Marshal(response)
+			w.Write(resp)
+			return
+		}
+
+		user, err := m.service.FindByID(int(id))
+		if err != nil {
+			fmt.Println("error 3")
+			response := APIResponse("failed", http.StatusUnprocessableEntity, "error", err)
+			resp, _ := json.Marshal(response)
+			w.Write(resp)
+			return
+		}
+
+		ctx := context.WithValue(context.Background(), "CurrentAdmin", user)
 		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)

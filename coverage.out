@@ -1,0 +1,22 @@
+mode: set
+funding/handler/user/user.go:22.85,24.2 1 1
+funding/handler/user/user.go:26.76,30.33 2 1
+funding/handler/user/user.go:38.2,41.16 3 1
+funding/handler/user/user.go:49.2,51.16 3 1
+funding/handler/user/user.go:59.2,60.16 2 1
+funding/handler/user/user.go:69.2,70.16 2 1
+funding/handler/user/user.go:77.2,87.15 5 1
+funding/handler/user/user.go:30.33,36.3 4 0
+funding/handler/user/user.go:41.16,48.3 5 0
+funding/handler/user/user.go:51.16,57.3 5 1
+funding/handler/user/user.go:60.16,67.3 5 1
+funding/handler/user/user.go:70.16,75.3 4 0
+funding/handler/user/user.go:90.69,93.33 2 0
+funding/handler/user/user.go:100.2,103.16 3 0
+funding/handler/user/user.go:110.2,111.16 2 0
+funding/handler/user/user.go:119.2,120.16 2 0
+funding/handler/user/user.go:127.2,137.15 5 0
+funding/handler/user/user.go:93.33,98.3 4 0
+funding/handler/user/user.go:103.16,108.3 4 0
+funding/handler/user/user.go:111.16,117.3 4 0
+funding/handler/user/user.go:120.16,125.3 4 0

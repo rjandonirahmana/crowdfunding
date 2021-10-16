@@ -13,7 +13,7 @@ type Repository struct {
 }
 
 type RepositoryUser interface {
-	Save(user User) error
+	Save(user User) (uint, error)
 	FindByEmail(email string) (User, error)
 	FindByID(ID int) (User, error)
 	UpdateUser(user User) error
@@ -24,23 +24,23 @@ func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{db: db}
 }
 
-func (r *Repository) Save(user User) error {
+func (r *Repository) Save(user User) (uint, error) {
 	querry := `	INSERT INTO 
 	users
 	(
 		name, email, occupation, password, role, created_at, updated_at, salt, avatar
 	) 
 	VALUES
-	($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id
 	`
-
-	_, err := r.db.Exec(querry, user.Name, user.Email, user.Occupation, user.PasswordHash, user.Role, time.Now(), time.Now(), user.Salt, user.Avatar)
+	var id uint
+	err := r.db.QueryRowx(querry, user.Name, user.Email, user.Occupation, user.PasswordHash, user.Role, time.Now(), time.Now(), user.Salt, user.Avatar).Scan(&id)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return id, nil
 
 }
 
@@ -59,10 +59,7 @@ func (r *Repository) FindByEmail(email string) (User, error) {
 
 func (r *Repository) FindByID(ID int) (User, error) {
 	querry := `
-	SELECT * FROM
-		users
-	WHERE 
-		id = $1
+	SELECT * FROM users WHERE id = $1
 	`
 	var user User
 	err := r.db.Get(&user, querry, ID)
