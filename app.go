@@ -6,6 +6,8 @@ import (
 	auth "funding/auth"
 	"funding/campaign"
 	"funding/handler"
+	handlercampaign "funding/handler/campaign"
+	handleruser "funding/handler/user"
 	"log"
 	"net/http"
 	"os"
@@ -37,13 +39,13 @@ func main() {
 	auth := auth.NewAuthentication(secretKey, secretKeyAdmin)
 	repoaccount := account.NewRepository(db)
 	serviceaccount := account.NewService(repoaccount)
-	handleraccount := handler.AccountHandler(serviceaccount, auth)
+	handleraccount := handleruser.AccountHandler(serviceaccount, auth)
 	middlware := handler.NewMiddleWare(auth, serviceaccount)
 
 	repoCampaign := campaign.NewRepository(db)
 
 	serviceCampaign := campaign.NewServiceCampaign(repoCampaign)
-	handerCampaign := handler.NewHandlerCampaign(serviceCampaign, serviceaccount)
+	handerCampaign := handlercampaign.NewHandlerCampaign(serviceCampaign, serviceaccount)
 
 	http.HandleFunc("/register", handleraccount.RegisterUser)
 	http.HandleFunc("/login", handleraccount.Login)

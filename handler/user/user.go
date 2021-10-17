@@ -1,4 +1,4 @@
-package user
+package handleruser
 
 import (
 	"encoding/json"
@@ -93,6 +93,7 @@ func (h *HanlderUser) Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		response := handler.APIResponse("failed", http.StatusInternalServerError, "cant continue if method not post", errors.New("need to method post"))
 		resp, _ := json.Marshal(response)
+		w.WriteHeader(500)
 		w.Write(resp)
 		return
 	}
@@ -103,6 +104,7 @@ func (h *HanlderUser) Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		response := handler.APIResponse("failed", http.StatusInternalServerError, "error", err)
 		resp, _ := json.Marshal(response)
+		w.WriteHeader(500)
 		w.Write(resp)
 		return
 	}
@@ -110,8 +112,9 @@ func (h *HanlderUser) Login(w http.ResponseWriter, r *http.Request) {
 	user, err := h.service.Login(input)
 	if err != nil {
 
-		response := handler.APIResponse("failed", http.StatusInternalServerError, fmt.Sprintf("%v", err), err)
+		response := handler.APIResponse("failed", 422, fmt.Sprintf("%v", err), err)
 		resp, _ := json.Marshal(response)
+		w.WriteHeader(422)
 		w.Write(resp)
 		return
 	}

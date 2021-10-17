@@ -1,4 +1,4 @@
-package user
+package handleruser
 
 import (
 	"bytes"
@@ -90,6 +90,38 @@ func TestRegisterUser(t *testing.T) {
 	}
 }
 
-// func TestLogin(t *testing.T) {
+func TestLogin(t *testing.T) {
+	testCases := []struct {
+		name       string
+		request    map[string]interface{}
+		expectCode int
+		expectMsg  string
+	}{
+		{
+			name:       "test1",
+			request:    map[string]interface{}{"email": "ateg@gmail.com", "password": "12345678"},
+			expectCode: 200,
+			expectMsg:  "success",
+		}, {
+			name:       "test2",
+			request:    map[string]interface{}{"email": "ngasal@gmail.com", "password": "12345678"},
+			expectCode: 422,
+			expectMsg:  "failed",
+		},
+	}
 
-// }
+	for _, test := range testCases {
+		reqBody, err := json.Marshal(test.request)
+		assert.NoError(t, err)
+
+		req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(reqBody))
+		req.Header.Set("Content-Type", "application/json")
+		res := httptest.NewRecorder()
+
+		h := http.HandlerFunc(controller.Login)
+		h.ServeHTTP(res, req)
+
+		fmt.Println(res)
+		assert.Equal(t, test.expectCode, res.Code)
+	}
+}

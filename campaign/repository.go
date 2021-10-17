@@ -69,9 +69,8 @@ func (r *repository) FindByID(campaign_id uint) (Campaigns, error) {
 	if err != nil {
 		return campaign, err
 	}
-	fmt.Printf("disini dapet ga %s", campaign.Name)
 	campaign.CampaignImage = append(campaign.CampaignImage, images...)
-	fmt.Println(campaign.Name)
+
 	return campaign, nil
 
 }
