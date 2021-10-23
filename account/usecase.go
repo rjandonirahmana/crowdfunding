@@ -25,6 +25,7 @@ func NewService(repository RepositoryUser) *service {
 const letterBytes = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789"
 
 func RandStringBytes(n int) string {
+	rand.Seed(time.Now().UTC().Unix())
 	b := make([]byte, n)
 	for i := range b {
 		b[i] = letterBytes[rand.Intn(len(letterBytes))]

@@ -1,7 +1,8 @@
 package admin
 
 import (
-	"errors"
+	"database/sql"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -27,6 +28,7 @@ func (r *repository) CreateAdmin(admin Admin) (uint, error) {
 	err := r.db.QueryRowx(querry, admin.Name, admin.Email, admin.Password, admin.JobID, admin.Secret).Scan(&id)
 
 	if err != nil {
+		fmt.Println("error disini ga?")
 		return 0, err
 	}
 	return id, nil
@@ -48,15 +50,11 @@ func (r *repository) FindAdmin(id uint) (Admin, error) {
 func (r *repository) IsEmailAvailable(email string) (bool, error) {
 	querry := `SELECT id FROM admin WHERE email = $1`
 
-	var id int
-	err := r.db.QueryRowx(querry, email).Scan(&id)
-	if err != nil {
-		return false, err
+	var id *int
+	err := r.db.Get(&id, querry, email)
+	if err != sql.ErrNoRows || *id != 0 {
+		return false, fmt.Errorf("error %v or email has been used", err)
 	}
 
-	if id == 0 {
-		return true, nil
-	}
-
-	return false, errors.New("email has been used, please use another email")
+	return true, nil
 }

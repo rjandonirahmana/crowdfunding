@@ -58,7 +58,7 @@ func TestRegisterUser(t *testing.T) {
 	}{
 		{
 			name:       "test1",
-			request:    map[string]interface{}{"name": "ateng", "email": "ateg@gmail.com", "password": "12345678", "confirm_password": "12345678", "occupation": "IT"},
+			request:    map[string]interface{}{"name": "ateng", "email": "ateaaag@gmail.com", "password": "12345678", "confirm_password": "12345678", "occupation": "IT"},
 			expectCode: 200,
 			expectMsg:  "success",
 		}, {

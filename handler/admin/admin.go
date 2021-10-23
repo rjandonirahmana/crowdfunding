@@ -1,31 +1,32 @@
-package handler
+package admin
 
 import (
 	"encoding/json"
 	"funding/admin"
 	"funding/auth"
+	"funding/handler"
 	"net/http"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 )
 
-type handler struct {
+type adminhandler struct {
 	auth    auth.Authentication
 	service admin.Service
 }
 
-func NewAdminHandler(service admin.Service) *handler {
-	return &handler{service: service}
+func NewAdminHandler(service admin.Service) *adminhandler {
+	return &adminhandler{service: service}
 }
 
-func (h *handler) RegisterAdmin(w http.ResponseWriter, r *http.Request) {
+func (h *adminhandler) RegisterAdmin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var input admin.InputAdmin
 	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
-		response := APIResponse("failed", http.StatusInternalServerError, "error parse json", nil)
+		response := handler.APIResponse("failed", http.StatusInternalServerError, "error parse json", nil)
 		resp, _ := json.Marshal(response)
 		w.Write(resp)
 		return
@@ -34,7 +35,7 @@ func (h *handler) RegisterAdmin(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	err = validate.Struct(&input)
 	if err != nil {
-		response := APIResponse("failed", http.StatusInternalServerError, "error validation input", err.Error())
+		response := handler.APIResponse("failed", http.StatusInternalServerError, "error validation input", err.Error())
 		resp, _ := json.Marshal(response)
 		w.Write(resp)
 		return
@@ -42,7 +43,7 @@ func (h *handler) RegisterAdmin(w http.ResponseWriter, r *http.Request) {
 
 	admin, err := h.service.Register(input)
 	if err != nil {
-		response := APIResponse("failed", http.StatusInternalServerError, "error to create account admin", err.Error())
+		response := handler.APIResponse("failed", http.StatusInternalServerError, "error to create account admin", err.Error())
 		resp, _ := json.Marshal(response)
 		w.Write(resp)
 		return
@@ -50,7 +51,7 @@ func (h *handler) RegisterAdmin(w http.ResponseWriter, r *http.Request) {
 
 	token, err := h.auth.GenerateTokenAdmin(admin.ID)
 	if err != nil {
-		response := APIResponse("failed", http.StatusInternalServerError, "error to create token", err.Error())
+		response := handler.APIResponse("failed", http.StatusInternalServerError, "error to create token", err.Error())
 		resp, _ := json.Marshal(response)
 		w.Write(resp)
 		return
@@ -63,7 +64,7 @@ func (h *handler) RegisterAdmin(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &cookie)
 
-	resonse := APIResponseToken("success", http.StatusOK, "done", admin, token)
+	resonse := handler.APIResponseToken("success", http.StatusOK, "done", admin, token)
 	resp, _ := json.Marshal(resonse)
 	w.Write(resp)
 

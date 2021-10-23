@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"funding/account"
+	"funding/admin"
 	auth "funding/auth"
 	"funding/campaign"
 	"funding/handler"
+	a "funding/handler/admin"
 	handlercampaign "funding/handler/campaign"
 	handleruser "funding/handler/user"
 	"log"
@@ -38,20 +40,24 @@ func main() {
 
 	auth := auth.NewAuthentication(secretKey, secretKeyAdmin)
 	repoaccount := account.NewRepository(db)
-	serviceaccount := account.NewService(repoaccount)
-	handleraccount := handleruser.AccountHandler(serviceaccount, auth)
-	middlware := handler.NewMiddleWare(auth, serviceaccount)
-
+	repoadmin := admin.NewRepositoryAdmin(db)
 	repoCampaign := campaign.NewRepository(db)
 
+	serviceadmin := admin.NewServiceAdmin(repoadmin)
+	serviceaccount := account.NewService(repoaccount)
+	middlware := handler.NewMiddleWare(auth, serviceaccount)
 	serviceCampaign := campaign.NewServiceCampaign(repoCampaign)
+
+	handleraccount := handleruser.AccountHandler(serviceaccount, auth)
 	handerCampaign := handlercampaign.NewHandlerCampaign(serviceCampaign, serviceaccount)
+	handlerAdmin := a.NewAdminHandler(serviceadmin)
 
 	http.HandleFunc("/register", handleraccount.RegisterUser)
 	http.HandleFunc("/login", handleraccount.Login)
 	http.HandleFunc("/campaigns", handerCampaign.GetCampaigns)
 	http.HandleFunc("/campaign", handerCampaign.GetCampaigID)
 	http.HandleFunc("/create", middlware.MidllerWare(handerCampaign.CreateCampaign))
+	http.HandleFunc("/admin", handlerAdmin.RegisterAdmin)
 
 	fmt.Println("starting web server at http://localhost:8181/")
 

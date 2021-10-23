@@ -44,6 +44,7 @@ func (s *service) Register(input InputAdmin) (Admin, error) {
 		Email:    input.Email,
 		Secret:   secret,
 		Password: password,
+		JobID:    input.Job_ID,
 	}
 
 	id, err := s.repository.CreateAdmin(admin)
