@@ -2,9 +2,10 @@ package admin
 
 import (
 	"encoding/json"
-	"funding/admin"
 	"funding/auth"
 	"funding/handler"
+	"funding/model"
+	"funding/usecase"
 	"net/http"
 	"time"
 
@@ -13,17 +14,17 @@ import (
 
 type adminhandler struct {
 	auth    auth.Authentication
-	service admin.Service
+	service usecase.ServiceAdmin
 }
 
-func NewAdminHandler(service admin.Service) *adminhandler {
+func NewAdminHandler(service usecase.ServiceAdmin) *adminhandler {
 	return &adminhandler{service: service}
 }
 
 func (h *adminhandler) RegisterAdmin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var input admin.InputAdmin
+	var input model.InputAdmin
 	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
 		response := handler.APIResponse("failed", http.StatusInternalServerError, "error parse json", nil)

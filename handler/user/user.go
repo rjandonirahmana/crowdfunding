@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"funding/account"
 	auth "funding/auth"
 	"funding/handler"
+	"funding/model"
+	"funding/usecase"
 	"io"
 	"net/http"
 	"time"
@@ -15,11 +16,11 @@ import (
 )
 
 type HanlderUser struct {
-	service account.Service
+	service usecase.ServiceUser
 	auth    auth.Authentication
 }
 
-func AccountHandler(service account.Service, auth auth.Authentication) *HanlderUser {
+func AccountHandler(service usecase.ServiceUser, auth auth.Authentication) *HanlderUser {
 	return &HanlderUser{service: service, auth: auth}
 }
 
@@ -35,7 +36,7 @@ func (h *HanlderUser) RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	var account account.RegisterUserInput
+	var account model.RegisterUserInput
 
 	err := json.NewDecoder(r.Body).Decode(&account)
 	if err != nil {
@@ -98,7 +99,7 @@ func (h *HanlderUser) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var input account.LoginInput
+	var input model.LoginInput
 
 	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {

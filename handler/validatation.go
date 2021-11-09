@@ -4,22 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"funding/account"
 	auth "funding/auth"
+	"funding/usecase"
 	"net/http"
 )
 
 type MiddlewaresAuth struct {
 	auth    auth.Authentication
-	service account.Service
+	service usecase.ServiceUser
 }
 
-// type MiddlewaresAuthAdmin struct {
-// 	auth         auth.Authentication
-// 	ServiceAdmin admin.Service
-// }
-
-func NewMiddleWare(auth auth.Authentication, service account.Service) *MiddlewaresAuth {
+func NewMiddleWare(auth auth.Authentication, service usecase.ServiceUser) *MiddlewaresAuth {
 	return &MiddlewaresAuth{auth: auth, service: service}
 }
 
@@ -45,7 +40,7 @@ func (m *MiddlewaresAuth) MidllerWare(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		user, err := m.service.FindByID(int(id))
+		user, err := m.service.FindByID(id)
 		if err != nil {
 			fmt.Println("error 3")
 			response := APIResponse("failed", http.StatusUnprocessableEntity, "error", err)

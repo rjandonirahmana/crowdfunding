@@ -3,26 +3,26 @@ package handlercampaign
 import (
 	"encoding/json"
 	"fmt"
-	"funding/account"
-	"funding/campaign"
 	"funding/handler"
+	"funding/model"
+	"funding/usecase"
 	"net/http"
 	"strconv"
 )
 
 type HandlerCampaign struct {
-	service campaign.ServiceCampaign
-	account account.Service
+	service usecase.ServiceCampaign
+	account usecase.ServiceUser
 }
 
-func NewHandlerCampaign(service campaign.ServiceCampaign, account account.Service) *HandlerCampaign {
+func NewHandlerCampaign(service usecase.ServiceCampaign, account usecase.ServiceUser) *HandlerCampaign {
 	return &HandlerCampaign{service: service, account: account}
 }
 
 func (h *HandlerCampaign) CreateCampaign(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("CurrentUser").(account.User)
+	user := r.Context().Value("CurrentUser").(model.User)
 	w.Header().Set("Content-Type", "application/json")
-	var input campaign.CreateCampaignInput
+	var input model.CreateCampaignInput
 
 	if r.Method != http.MethodPost {
 		response := handler.APIResponse("failed", http.StatusInternalServerError, "failed post bang", nil)

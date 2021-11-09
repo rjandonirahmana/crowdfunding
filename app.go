@@ -2,14 +2,13 @@ package main
 
 import (
 	"fmt"
-	"funding/account"
-	"funding/admin"
 	auth "funding/auth"
-	"funding/campaign"
 	"funding/handler"
 	a "funding/handler/admin"
 	handlercampaign "funding/handler/campaign"
 	handleruser "funding/handler/user"
+	"funding/repository"
+	"funding/usecase"
 	"log"
 	"net/http"
 	"os"
@@ -39,14 +38,14 @@ func main() {
 	}
 
 	auth := auth.NewAuthentication(secretKey, secretKeyAdmin)
-	repoaccount := account.NewRepository(db)
-	repoadmin := admin.NewRepositoryAdmin(db)
-	repoCampaign := campaign.NewRepository(db)
+	repoaccount := repository.NewRepositoryUser(db)
+	repoadmin := repository.NewRepositoryAdmin(db)
+	repoCampaign := repository.NewRepositoryCampaign(db)
 
-	serviceadmin := admin.NewServiceAdmin(repoadmin)
-	serviceaccount := account.NewService(repoaccount)
+	serviceadmin := usecase.NewServiceAdmin(repoadmin)
+	serviceaccount := usecase.NewService(repoaccount)
 	middlware := handler.NewMiddleWare(auth, serviceaccount)
-	serviceCampaign := campaign.NewServiceCampaign(repoCampaign)
+	serviceCampaign := usecase.NewServiceCampaign(repoCampaign)
 
 	handleraccount := handleruser.AccountHandler(serviceaccount, auth)
 	handerCampaign := handlercampaign.NewHandlerCampaign(serviceCampaign, serviceaccount)
