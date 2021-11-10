@@ -16,10 +16,10 @@ type repositoryUser struct {
 
 type RepositoryUser interface {
 	Save(user model.User) (*model.User, error)
-	FindByEmail(email string) (*model.User, error)
+	FindByEmail(email *string) (*model.User, error)
 	FindByID(ID uint) (*model.User, error)
 	// UpdateUser(user model.User) error
-	IsEmailAvailable(email string) error
+	IsEmailAvailable(email *string) error
 }
 
 func NewRepositoryUser(db *sqlx.DB) *repositoryUser {
@@ -45,7 +45,7 @@ func (r *repositoryUser) Save(user model.User) (*model.User, error) {
 
 }
 
-func (r *repositoryUser) FindByEmail(email string) (*model.User, error) {
+func (r *repositoryUser) FindByEmail(email *string) (*model.User, error) {
 	querry := ` 
 	SELECT * FROM users WHERE email = $1`
 
@@ -92,7 +92,7 @@ func (r *repositoryUser) FindByID(ID uint) (*model.User, error) {
 
 // }
 
-func (r *repositoryUser) IsEmailAvailable(email string) error {
+func (r *repositoryUser) IsEmailAvailable(email *string) error {
 	var id uint
 	querry := `SELECT id FROM users WHERE email = $1`
 	err := r.db.QueryRowx(querry, email).Scan(&id)

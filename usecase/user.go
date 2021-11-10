@@ -9,8 +9,8 @@ import (
 )
 
 type ServiceUser interface {
-	RegisterUser(input model.RegisterUserInput) (*model.User, error)
-	Login(input model.LoginInput) (*model.User, error)
+	RegisterUser(input *model.RegisterUserInput) (*model.User, error)
+	Login(input *model.LoginInput) (*model.User, error)
 	FindByID(id uint) (*model.User, error)
 }
 
@@ -22,9 +22,9 @@ func NewService(repository repository.RepositoryUser) *serviceUser {
 	return &serviceUser{repository: repository}
 }
 
-func (s *serviceUser) RegisterUser(input model.RegisterUserInput) (*model.User, error) {
+func (s *serviceUser) RegisterUser(input *model.RegisterUserInput) (*model.User, error) {
 
-	err := s.repository.IsEmailAvailable(input.Email)
+	err := s.repository.IsEmailAvailable(&input.Email)
 	if err != nil {
 		return &model.User{}, fmt.Errorf("errors : %v", err)
 	}
@@ -51,8 +51,8 @@ func (s *serviceUser) RegisterUser(input model.RegisterUserInput) (*model.User, 
 
 }
 
-func (s *serviceUser) Login(input model.LoginInput) (*model.User, error) {
-	account, err := s.repository.FindByEmail(input.Email)
+func (s *serviceUser) Login(input *model.LoginInput) (*model.User, error) {
+	account, err := s.repository.FindByEmail(&input.Email)
 	if err != nil {
 		return &model.User{}, err
 	}

@@ -60,6 +60,9 @@ func main() {
 
 	fmt.Println("starting web server at http://localhost:8181/")
 
-	http.ListenAndServe(":8181", nil)
+	err = http.ListenAndServe(":8281", nil)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 }

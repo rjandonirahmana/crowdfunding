@@ -20,7 +20,7 @@ func NewHandlerCampaign(service usecase.ServiceCampaign, account usecase.Service
 }
 
 func (h *HandlerCampaign) CreateCampaign(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("CurrentUser").(model.User)
+	user := r.Context().Value("CurrentUser").(*model.User)
 	w.Header().Set("Content-Type", "application/json")
 	var input model.CreateCampaignInput
 
@@ -39,7 +39,7 @@ func (h *HandlerCampaign) CreateCampaign(w http.ResponseWriter, r *http.Request)
 		w.Write(resp)
 		return
 	}
-	campaign, err := h.service.Create(input, user)
+	campaign, err := h.service.Create(&input, user)
 	if err != nil {
 		response := handler.APIResponse("failed", 422, fmt.Sprintf("error %v", err), campaign)
 		resp, _ := json.Marshal(response)

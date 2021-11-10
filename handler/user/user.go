@@ -57,7 +57,7 @@ func (h *HanlderUser) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.service.RegisterUser(account)
+	user, err := h.service.RegisterUser(&account)
 	if err != nil {
 		response := handler.APIResponse("failed", http.StatusUnprocessableEntity, "error", err.Error())
 		resp, _ := json.Marshal(response)
@@ -110,7 +110,7 @@ func (h *HanlderUser) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.service.Login(input)
+	user, err := h.service.Login(&input)
 	if err != nil {
 
 		response := handler.APIResponse("failed", 422, fmt.Sprintf("%v", err), err)
