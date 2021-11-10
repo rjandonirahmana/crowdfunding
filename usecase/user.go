@@ -11,7 +11,7 @@ import (
 type ServiceUser interface {
 	RegisterUser(input *model.RegisterUserInput) (*model.User, error)
 	Login(input *model.LoginInput) (*model.User, error)
-	FindByID(id uint) (*model.User, error)
+	FindByID(id *uint) (*model.User, error)
 }
 
 type serviceUser struct {
@@ -69,7 +69,7 @@ func (s *serviceUser) Login(input *model.LoginInput) (*model.User, error) {
 
 }
 
-func (s *serviceUser) FindByID(id uint) (*model.User, error) {
+func (s *serviceUser) FindByID(id *uint) (*model.User, error) {
 	user, err := s.repository.FindByID(id)
 	if err != nil {
 		return user, err

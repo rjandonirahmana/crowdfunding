@@ -72,3 +72,8 @@ func (r *campaignRepo) FindByID(campaign_id uint) (*model.Campaign, error) {
 	return &campaign, nil
 
 }
+
+
+// func (r *campaignRepo) UpdateCampaign(campaign *model.Campaign) error {
+
+// }

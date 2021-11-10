@@ -15,7 +15,7 @@ type serviceAdmin struct {
 }
 
 type ServiceAdmin interface {
-	Register(input model.InputAdmin) (model.Admin, error)
+	Register(input *model.InputAdmin) (*model.Admin, error)
 }
 
 func NewServiceAdmin(repo repository.RepositoryAdmin) *serviceAdmin {
@@ -33,18 +33,18 @@ func RandStringRunes(n int) string {
 	return base64.URLEncoding.EncodeToString(b)
 }
 
-func (s *serviceAdmin) Register(input model.InputAdmin) (model.Admin, error) {
+func (s *serviceAdmin) Register(input *model.InputAdmin) (*model.Admin, error) {
 
-	err := s.repository.IsEmailAvailable(input.Email)
+	err := s.repository.IsEmailAvailable(&input.Email)
 	if err != nil {
-		return model.Admin{}, err
+		return &model.Admin{}, err
 	}
 
 	secret := RandStringRunes(10)
 	h := sha256.New()
 	h.Write([]byte(input.Password + secret))
 	password := fmt.Sprintf("%X", h.Sum([]byte(secret)))
-	admin := model.Admin{
+	admin := &model.Admin{
 		Name:     input.Name,
 		Email:    input.Email,
 		Secret:   secret,
@@ -52,11 +52,10 @@ func (s *serviceAdmin) Register(input model.InputAdmin) (model.Admin, error) {
 		JobID:    input.Job_ID,
 	}
 
-	id, err := s.repository.CreateAdmin(admin)
+	admin, err = s.repository.CreateAdmin(admin)
 	if err != nil {
 		return admin, err
 	}
 
-	admin.ID = id
 	return admin, nil
 }

@@ -17,7 +17,7 @@ type repositoryUser struct {
 type RepositoryUser interface {
 	Save(user model.User) (*model.User, error)
 	FindByEmail(email *string) (*model.User, error)
-	FindByID(ID uint) (*model.User, error)
+	FindByID(ID *uint) (*model.User, error)
 	// UpdateUser(user model.User) error
 	IsEmailAvailable(email *string) error
 }
@@ -58,12 +58,12 @@ func (r *repositoryUser) FindByEmail(email *string) (*model.User, error) {
 	return &user, nil
 }
 
-func (r *repositoryUser) FindByID(ID uint) (*model.User, error) {
+func (r *repositoryUser) FindByID(ID *uint) (*model.User, error) {
 	querry := `
 	SELECT * FROM users WHERE id = $1
 	`
 	var user model.User
-	err := r.db.Get(&user, querry, ID)
+	err := r.db.Get(&user, querry, *ID)
 
 	if err != nil {
 		return &model.User{}, err

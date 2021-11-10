@@ -1,6 +1,8 @@
 package main
 
 import (
+	elastic "funding/elasticsearch"
+
 	"fmt"
 	auth "funding/auth"
 	"funding/handler"
@@ -20,7 +22,13 @@ import (
 
 func main() {
 
-	err := godotenv.Load(".env")
+	el := elastic.NewCreateIndex([]string{"http://localhost:9200"})
+	err := el.CreateIndex("campaign")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	err = godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}

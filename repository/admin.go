@@ -14,26 +14,25 @@ type adminRepo struct {
 }
 
 type RepositoryAdmin interface {
-	CreateAdmin(admin model.Admin) (uint, error)
+	CreateAdmin(admin *model.Admin) (*model.Admin, error)
 	FindAdmin(id uint) (model.Admin, error)
-	IsEmailAvailable(email string) error
+	IsEmailAvailable(email *string) error
 }
 
 func NewRepositoryAdmin(db *sqlx.DB) *adminRepo {
 	return &adminRepo{db: db}
 }
 
-func (r *adminRepo) CreateAdmin(admin model.Admin) (uint, error) {
+func (r *adminRepo) CreateAdmin(admin *model.Admin) (*model.Admin, error) {
 	querry := `INSERT INTO admin (name, email, password, jobdesk_id, secret) VALUES($1, $2, $3, $4, $5) RETURNING id`
 
-	var id uint
-	err := r.db.QueryRowx(querry, admin.Name, admin.Email, admin.Password, admin.JobID, admin.Secret).Scan(&id)
+	err := r.db.QueryRowx(querry, admin.Name, admin.Email, admin.Password, admin.JobID, admin.Secret).Scan(&admin.ID)
 
 	if err != nil {
 		fmt.Println("error disini ga?")
-		return 0, err
+		return nil, err
 	}
-	return id, nil
+	return admin, nil
 }
 
 func (r *adminRepo) FindAdmin(id uint) (model.Admin, error) {
@@ -49,7 +48,7 @@ func (r *adminRepo) FindAdmin(id uint) (model.Admin, error) {
 
 }
 
-func (r *adminRepo) IsEmailAvailable(email string) error {
+func (r *adminRepo) IsEmailAvailable(email *string) error {
 	var id uint
 	querry := `SELECT id FROM admin WHERE email = $1`
 	err := r.db.QueryRowx(querry, email).Scan(&id)

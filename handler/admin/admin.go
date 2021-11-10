@@ -42,7 +42,7 @@ func (h *adminhandler) RegisterAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	admin, err := h.service.Register(input)
+	admin, err := h.service.Register(&input)
 	if err != nil {
 		response := handler.APIResponse("failed", http.StatusInternalServerError, "error to create account admin", err.Error())
 		resp, _ := json.Marshal(response)

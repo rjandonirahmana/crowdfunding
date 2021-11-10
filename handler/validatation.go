@@ -40,7 +40,7 @@ func (m *MiddlewaresAuth) MidllerWare(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		user, err := m.service.FindByID(id)
+		user, err := m.service.FindByID(&id)
 		if err != nil {
 			fmt.Println("error 3")
 			response := APIResponse("failed", http.StatusUnprocessableEntity, "error", err)

@@ -21,16 +21,17 @@ func NewElasticRepo(elastic Index, timeduration time.Duration) *repository {
 	return &repository{elastic: elastic, timeout: timeduration}
 }
 
+type ElasticRepository interface {
+	CreateCampaign(ctx context.Context, campaignye *model.Campaign) error
+	UpdateCampaign(ctx context.Context, campanye *model.Campaign) (*model.Campaign, error)
+	FindByID(ctx context.Context, id uint) (*model.Campaign, error)
+}
+
 type Storage struct {
 	Source interface{} `json:"_source"`
 }
 
-type ElasticRepository interface {
-	CreateCampaign(ctx context.Context, campaignye model.Campaign) error
-	UpdateCampaign(ctx context.Context, campanye model.Campaign) (model.Campaign, error)
-}
-
-func (r *repository) CreateCampaign(ctx context.Context, campaignye model.Campaign) error {
+func (r *repository) CreateCampaign(ctx context.Context, campaignye *model.Campaign) error {
 	reqBody, err := json.Marshal(campaignye)
 	if err != nil {
 		return err
@@ -65,7 +66,7 @@ func (r *repository) CreateCampaign(ctx context.Context, campaignye model.Campai
 
 }
 
-func (r *repository) UpdateCampaign(ctx context.Context, campanye model.Campaign) (model.Campaign, error) {
+func (r *repository) UpdateCampaign(ctx context.Context, campanye *model.Campaign) (*model.Campaign, error) {
 	reqBody, err := json.Marshal(campanye)
 	if err != nil {
 		return campanye, err
@@ -92,7 +93,7 @@ func (r *repository) UpdateCampaign(ctx context.Context, campanye model.Campaign
 	}
 
 	var (
-		body    model.Campaign
+		body    *model.Campaign
 		storage Storage
 	)
 
@@ -103,4 +104,40 @@ func (r *repository) UpdateCampaign(ctx context.Context, campanye model.Campaign
 	}
 
 	return body, nil
+}
+
+func (r *repository) FindByID(ctx context.Context, id uint) (*model.Campaign, error) {
+	req := esapi.GetRequest{
+		Index:      r.elastic.indexName,
+		DocumentID: fmt.Sprintf("%d", id),
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, r.timeout)
+	defer cancel()
+
+	res, err := req.Do(ctx, r.elastic.client)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		return nil, err
+	}
+	if res.StatusCode == 404 {
+		return nil, fmt.Errorf("cannot find")
+	}
+
+	var (
+		storage model.Campaign
+		body    Storage
+	)
+
+	body.Source = &storage
+
+	if err := json.NewDecoder(res.Body).Decode(&body); err != nil {
+		return nil, fmt.Errorf("find one: decode: %w", err)
+	}
+
+	return &storage, nil
 }
